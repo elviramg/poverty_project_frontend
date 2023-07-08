@@ -11,9 +11,12 @@ st.markdown ("""
 
 
 # Upload DataFrame
-df = pd.read_csv('indicadores de pobreza municipal_2010.csv')
+df = pd.read_csv('data/indicadores de pobreza municipal_2010.csv', encoding='latin-1')
 
-X = df['total_population']
-y = df['poverty_percentage']
+X = df['poblacion']
+y = df['pobreza_pob']
 
-st.plt.plot(X,y)
+fig, ax = plt.subplots()
+ax.hist(X, bins=20)
+
+st.pyplot(fig)
