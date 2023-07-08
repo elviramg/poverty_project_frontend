@@ -16,4 +16,4 @@ df = pd.read_csv('indicadores de pobreza municipal_2010.csv')
 X = df['total_population']
 y = df['poverty_percentage']
 
-plt.plot(X,y)
+st.plt.plot(X,y)
