@@ -17,9 +17,9 @@ margins_css = """
 st.markdown(margins_css, unsafe_allow_html=True)
 
 st.markdown("""
-             # Evolution of poverty in Mexico
+             # 🇲🇽 Evolution of poverty in Mexico
 
-             ## Predicting states at risk
+             ## Predicting states at risk 📉
 
              ### Problem
             """)
