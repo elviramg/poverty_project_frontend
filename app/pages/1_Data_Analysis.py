@@ -3,7 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import geopandas as gpd
-from utils import get_csv
+from utils import get_csv, get_recovery_graph
+from dateutil.relativedelta import relativedelta
 
 data = get_csv()
 
@@ -87,6 +88,51 @@ def main():
 
     # Display on Streamlit
     st.pyplot(fig)
+
+####################################################################################################
+    df_graph = get_csv()
+
+    july_index = df_graph.index.get_loc('2020-07-01')
+    july_index = df_graph.index.get_loc('2020-07-01')
+    states_list = df.columns
+
+    states_past_covid = []
+    for state in states_list:
+        pre_cov_pov = df[state].loc['2020-01-01']
+        states_past_covid.append(df[july_index:][state][df[state][july_index:] <= pre_cov_pov].sort_index().head(1))
+
+    df_months_recovered = pd.DataFrame(states_past_covid)
+
+    # Fill NaN values with -1
+    df_months_recovered = df_months_recovered.fillna(-1)
+
+    # Quarter for COVID over which we measure recovery time
+    april_2020 = pd.Timestamp('2020-04-01')
+
+    # Initialize Dict that will creat recovery df
+    recovered_dictionary = {}
+
+    for state in states_list:
+        # Create Boolean Mask for Final Recovery Data Frame
+        mask = df_months_recovered.loc[state] != -1
+
+        if mask.any():
+            first_non_nan_date = df_months_recovered.loc[state][df_months_recovered.loc[state] != -1].index[0]
+            diff = relativedelta(first_non_nan_date, april_2020)
+            months_diff = diff.years * 12 + diff.months
+            recovered_dictionary[state] = months_diff
+        else:
+            recovered_dictionary[state] = -1
+
+    recovered_dictionary
+    recovered_df = pd.DataFrame(recovered_dictionary.values(), index = recovered_dictionary.keys())
+    recovered_df.rename(columns = {0:'Months since 2020-04-01'},inplace = True)
+    recovered_df = recovered_df.sort_values('Months since 2020-04-01', ascending = False)
+
+    graph = get_recovery_graph(recovered_df)
+
+    # Display on Streamlit
+    st.pyplot(graph)
 
 if __name__ == '__main__':
     main()
