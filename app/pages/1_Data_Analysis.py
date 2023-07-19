@@ -122,7 +122,6 @@ def main():
         else:
             recovered_dictionary[state] = -1
 
-    recovered_dictionary
     recovered_df = pd.DataFrame(recovered_dictionary.values(), index = recovered_dictionary.keys())
     recovered_df.rename(columns = {0:'Months since 2020-04-01'},inplace = True)
     recovered_df = recovered_df.sort_values('Months since 2020-04-01', ascending = False)
