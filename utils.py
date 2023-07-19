@@ -60,8 +60,8 @@ def get_recovery_graph(recovered_df):
     state_recovery_data = recovered_df.sort_values('Months since 2020-04-01')
     fig, ax = plt.subplots(figsize=(12, 10))
     state_recovery_data.plot(kind='barh', ax=ax, color='skyblue', edgecolor='black', legend=False)
-    ax.set_title('Tiempo de recuperación de los estados desde Abril 2020', fontsize=16)
+    ax.set_title('States recovery time from April 2020', fontsize=16)
     ax.set_xlabel('Meses desde Abril 2020', fontsize=14)
-    ax.set_ylabel('Estados', fontsize=14)
+    ax.set_ylabel('Months from April 2020', fontsize=14)
     ax.axvline(0, color='red', linestyle='--')
     return fig
