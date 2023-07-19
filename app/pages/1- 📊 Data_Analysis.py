@@ -6,15 +6,18 @@ import geopandas as gpd
 from utils import get_csv, get_recovery_graph
 from dateutil.relativedelta import relativedelta
 import altair as alt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 data = get_csv()
+
+st.set_page_config(layout="wide")
 
 #adding marging specs for the main page with css inyection
 margins_css = """
     <style>
         .main > div {
-            padding-left: 2rem;
-            padding-right: 2rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
             padding-top: 0.5rem;
         }
     </style>
@@ -33,15 +36,9 @@ with col1:
     st.markdown(("## " + ("Labor Poverty by State")))
     st.markdown(
         (
-            "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison."
+            "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison.\n --------"
         )
     )
-
-        # Verifica si un estado fue seleccionado desde col2
-    if 'selected_state' in st.session_state:
-        states = [st.session_state.selected_state]  # Usa el estado seleccionado en el mapa para filtrar las gráficas
-    else:
-        states = ["National"]  # O cualquier valor predeterminado que prefieras
 
     def line_plots(data: pd.DataFrame):
         """Renders line plots for selected regions (states) from data argument."""
@@ -62,42 +59,47 @@ with col1:
         if selected_states.empty:
             st.warning("No state selected!")
         else:
-            fig, ax = plt.subplots(figsize=(15, 15))
+            # Create a DataFrame for the selected states and reset the index
+            selected_states_df = selected_states.reset_index()
 
-            for state in selected_states.columns:
-                ax.plot(selected_states.index, selected_states[state], label=state, linewidth=4, color='red')
+            # Convert the datetime values in the index to strings
+            selected_states_df["index"] = selected_states_df["index"].dt.strftime("%Y-%m-%d")
 
-            ax.set_facecolor("none")
-            fig.patch.set_alpha(0.0)
+            # Melt the DataFrame to make it suitable for Altair
+            selected_states_melted = pd.melt(selected_states_df, id_vars="index", var_name="State", value_name="Percentage")
 
-            ax.tick_params(axis='both', colors='white', labelsize=20)  # Cambiado el tamaño de las marcas (ticks) aquí
-            ax.xaxis.label.set_color('white')
-            ax.yaxis.label.set_color('white')
-            ax.title.set_color('white')
+            # Create the Altair chart
+            chart = alt.Chart(selected_states_melted).mark_line().encode(
+                x=alt.X("index:T", title="Date"),
+                y=alt.Y("Percentage:Q", title="Percentage"),
+                color=alt.Color("State:N", title="State"),
+                tooltip=["index:T", "Percentage:Q", "State:N"]
+            ).properties(
+                width=550,
+                height=400
+            ).configure_axis(
+                labelColor="white",
+                titleColor="white"
+            ).configure_legend(
+                labelColor="white",
+                titleColor="white"
+            ).configure_title(
+                color="white"
+            ).interactive()
 
-            ax.set_xlabel("Date", color='white', fontsize=20)  # Cambiado el tamaño de la letra aquí
-            ax.set_ylabel("Percentage", color='white', fontsize=20)  # Cambiado el tamaño de la letra aquí
-            ax.set_title("Percentage of People Living in Poverty", color='white', fontsize=20)  # Cambiado el tamaño de la letra aquí
-
-            for spine in ax.spines.values():
-                spine.set_edgecolor('white')
-
-            ax.legend()
-
-            st.pyplot(fig)
+        # Display the Altair chart using Streamlit's altair_chart function
+        st.altair_chart(chart)
 
     # Call the function with the 'data' DataFrame as the argument
     data = get_csv()
     line_plots(data)
 
-
 with col2:
     st.markdown(("## " + ("Poverty Rate by State in Mexico")))
     st.markdown(
         (
-            """Visualize the poverty rate across different states in Mexico for a specific date. Use the dropdown menu to choose a date.
-            """
-        )
+            "Visualize the poverty rate across different states in Mexico for a specific date. \n Use the dropdown menu to choose a date.\n --------"
+     )
     )
 
     # Function to load data
@@ -132,27 +134,29 @@ with col2:
     # Merge GeoDataFrame with selected data
     merged = gdf.set_index("name").join(selected_data.astype(float))
 
-
     # Plotting
-    fig, ax = plt.subplots(1, 1, figsize=(14, 14))
+    fig, ax = plt.subplots(1, 1, figsize=(10, 50))
 
     # 1. Hacer el fondo de los ejes y de la figura transparente
     ax.set_facecolor("none")
     fig.patch.set_alpha(0.0)
     ax.axis('off')  # Desactiva los ejes para que no se muestren
 
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+
     # 2. Cambiar el color de borde a blanco
-    merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='white', legend=True)
+    merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=1, ax=ax, edgecolor='black', legend=True, cax=cax)
 
     # 3. Cambiar el color de los textos y las etiquetas de los ejes a blanco
     ax.tick_params(axis='both', colors='white')
     ax.xaxis.label.set_color('white')
     ax.yaxis.label.set_color('white')
     ax.title.set_color('white')
-    plt.title(f'Data for {date}', color='white', fontsize=18)
+    ax.set_title(f'Data for {date}', color='white', fontsize=18)
+
 
     # 4. Ajustar el color del texto en la barra de colores a blanco
-    cax = plt.gcf().axes[-1]
     cax.tick_params(color='white')
     cax.xaxis.label.set_color('white')
     cax.yaxis.label.set_color('white')
@@ -161,6 +165,7 @@ with col2:
 
     # Display on Streamlit
     st.pyplot(fig)
+
 
 def main():
     st.markdown(("## " + ("Recovery from Labor Poverty Post-COVID")))
@@ -209,6 +214,7 @@ def main():
     #recovered_df.value_counts().sort_index()
 
     graph = get_recovery_graph(recovered_df)
+    graph.set_size_inches(20, 15)
     st.pyplot(graph)
 
     st.write("""As we can see 13 States had not recovered to pre-pandemic poverty levels which are from Mexico City till Michoacán.

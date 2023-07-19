@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.colors as mcolors
 
 def get_csv():
     labor_pov = pd.read_csv("data/Labor_Poverty.csv", index_col=0, parse_dates=True)
@@ -58,10 +60,24 @@ def yearly_rankings(data, start_year=2005, end_year=2023):
 
 def get_recovery_graph(recovered_df):
     state_recovery_data = recovered_df.sort_values('Months since 2020-04-01')
+
+    # Crear lista de colores basada en los valores del DataFrame
+    colors = []
+    max_value = state_recovery_data['Months since 2020-04-01'].max()
+    for value in state_recovery_data['Months since 2020-04-01']:
+        if value == -1:
+            colors.append('red')
+        else:
+            # Genera un valor de color basado en el valor actual
+            color_intensity = 1 - np.clip(value / max_value, 0, 1)  # Esto asegura que el verde no sea demasiado oscuro
+            colors.append(mcolors.to_rgba((1 - color_intensity, 1, 0)))  # Establece un color en formato RGB
+
     fig, ax = plt.subplots(figsize=(12, 10))
-    state_recovery_data.plot(kind='barh', ax=ax, color='skyblue', edgecolor='black', legend=False)
+    state_recovery_data['Months since 2020-04-01'].plot(kind='barh', ax=ax, color=colors, edgecolor='black', legend=False)
     ax.set_title('States recovery time from April 2020', fontsize=16)
-    ax.set_xlabel('Meses desde Abril 2020', fontsize=14)
+    ax.set_xlabel('Months since Abril 2020', fontsize=14)
     ax.set_ylabel('Months from April 2020', fontsize=14)
+    ax.text(0.5, 0.09, 'A shorter green bar indicates faster return to pre-COVID poverty levels.', transform=ax.transAxes, fontsize=15, va='top')
     ax.axvline(0, color='red', linestyle='--')
+
     return fig
