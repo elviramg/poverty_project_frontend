@@ -5,6 +5,7 @@ import json
 import geopandas as gpd
 from utils import get_csv, get_recovery_graph
 from dateutil.relativedelta import relativedelta
+import altair as alt
 
 data = get_csv()
 
@@ -36,6 +37,12 @@ with col1:
         )
     )
 
+        # Verifica si un estado fue seleccionado desde col2
+    if 'selected_state' in st.session_state:
+        states = [st.session_state.selected_state]  # Usa el estado seleccionado en el mapa para filtrar las gráficas
+    else:
+        states = ["National"]  # O cualquier valor predeterminado que prefieras
+
     def line_plots(data: pd.DataFrame):
         """Renders line plots for selected regions (states) from data argument."""
 
@@ -55,34 +62,28 @@ with col1:
         if selected_states.empty:
             st.warning("No state selected!")
         else:
-            # 1. Cambiar el tamaño de la figura a (15, 15)
             fig, ax = plt.subplots(figsize=(15, 15))
 
             for state in selected_states.columns:
-                # Plot the data on the axes
-                ax.plot(selected_states.index, selected_states[state], label=state)
+                ax.plot(selected_states.index, selected_states[state], label=state, linewidth=4, color='red')
 
-            # 2. Hacer el fondo de los ejes y de la figura transparente
             ax.set_facecolor("none")
             fig.patch.set_alpha(0.0)
 
-            # 3. Cambiar el color de los textos, las etiquetas de los ejes y las líneas de los ejes a blanco
-            ax.tick_params(axis='both', colors='white')
+            ax.tick_params(axis='both', colors='white', labelsize=20)  # Cambiado el tamaño de las marcas (ticks) aquí
             ax.xaxis.label.set_color('white')
             ax.yaxis.label.set_color('white')
             ax.title.set_color('white')
 
-            ax.set_xlabel("Date", color='white')
-            ax.set_ylabel("Percentage", color='white')
-            ax.set_title("Percentage of People Living in Poverty", color='white')
+            ax.set_xlabel("Date", color='white', fontsize=20)  # Cambiado el tamaño de la letra aquí
+            ax.set_ylabel("Percentage", color='white', fontsize=20)  # Cambiado el tamaño de la letra aquí
+            ax.set_title("Percentage of People Living in Poverty", color='white', fontsize=20)  # Cambiado el tamaño de la letra aquí
 
-            # 4. Cambiar el color de los marcos de los ejes a blanco
             for spine in ax.spines.values():
                 spine.set_edgecolor('white')
 
             ax.legend()
 
-            # Display the plot using Streamlit's pyplot function
             st.pyplot(fig)
 
     # Call the function with the 'data' DataFrame as the argument
@@ -90,12 +91,12 @@ with col1:
     line_plots(data)
 
 
-
 with col2:
     st.markdown(("## " + ("Poverty Rate by State in Mexico")))
     st.markdown(
         (
-            "Visualize the poverty rate across different states in Mexico for a specific date. Use the dropdown menu to choose a date."
+            """Visualize the poverty rate across different states in Mexico for a specific date. Use the dropdown menu to choose a date.
+            """
         )
     )
 
@@ -131,8 +132,9 @@ with col2:
     # Merge GeoDataFrame with selected data
     merged = gdf.set_index("name").join(selected_data.astype(float))
 
+
     # Plotting
-    fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+    fig, ax = plt.subplots(1, 1, figsize=(14, 14))
 
     # 1. Hacer el fondo de los ejes y de la figura transparente
     ax.set_facecolor("none")
@@ -159,7 +161,6 @@ with col2:
 
     # Display on Streamlit
     st.pyplot(fig)
-
 
 def main():
     st.markdown(("## " + ("Recovery from Labor Poverty Post-COVID")))
