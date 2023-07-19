@@ -90,16 +90,14 @@ def main():
     st.pyplot(fig)
 
 ####################################################################################################
-    df_graph = get_csv()
-
-    july_index = df_graph.index.get_loc('2020-07-01')
-    july_index = df_graph.index.get_loc('2020-07-01')
-    states_list = df.columns
+    july_index = data.index.get_loc('2020-07-01')
+    july_index = data.index.get_loc('2020-07-01')
+    states_list = data.columns
 
     states_past_covid = []
     for state in states_list:
-        pre_cov_pov = df[state].loc['2020-01-01']
-        states_past_covid.append(df[july_index:][state][df[state][july_index:] <= pre_cov_pov].sort_index().head(1))
+        pre_cov_pov = data[state].loc['2020-01-01']
+        states_past_covid.append(data[july_index:][state][data[state][july_index:] <= pre_cov_pov].sort_index().head(1))
 
     df_months_recovered = pd.DataFrame(states_past_covid)
 
@@ -128,10 +126,9 @@ def main():
     recovered_df = pd.DataFrame(recovered_dictionary.values(), index = recovered_dictionary.keys())
     recovered_df.rename(columns = {0:'Months since 2020-04-01'},inplace = True)
     recovered_df = recovered_df.sort_values('Months since 2020-04-01', ascending = False)
+    #recovered_df.value_counts().sort_index()
 
     graph = get_recovery_graph(recovered_df)
-
-    # Display on Streamlit
     st.pyplot(graph)
 
 if __name__ == '__main__':
