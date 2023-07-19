@@ -4,35 +4,49 @@ import json
 import geopandas as gpd
 import matplotlib.pyplot as plt
 
-# Load the dataset
-df = pd.read_csv('data/Labor_Poverty.csv')
+# Function to load data
+@st.cache
+def load_data():
+    return pd.read_csv('data/Labor_Poverty.csv')
 
-# Add title and header
-st.title("Labor Poverty in Mexico")
+# Function to load GeoJSON
+@st.cache
+def load_geojson():
+    with open("data/mexicoHigh.json", "r") as file:
+        return json.load(file)
 
-# Dropdown for selecting a date
-date = st.selectbox('Select a date:', df['Unnamed: 0'].unique())
+def main():
+    # Load the dataset
+    df = load_data()
 
-# Filter the dataset based on the selected date
-selected_data = df[df['Unnamed: 0'] == date].transpose().reset_index()
-selected_data.columns = ['State', 'Poverty Rate']
-selected_data = selected_data.iloc[1:]  # Exclude the date row
-selected_data.set_index("State", inplace=True)
+    # Add title and header
+    st.title("Labor Poverty in Mexico")
 
-# Load GeoJSON file
-with open("data/mexicoHigh.json") as response:
-    geo = json.load(response)
+    # Dropdown for selecting a date
+    date = st.selectbox('Select a date:', df['Unnamed: 0'].unique())
 
-# Convert GeoJSON to GeoDataFrame
-gdf = gpd.GeoDataFrame.from_features((geo))
+    # Filter the dataset based on the selected date
+    selected_data = df[df['Unnamed: 0'] == date].transpose().reset_index()
+    selected_data.columns = ['State', 'Poverty Rate']
+    selected_data = selected_data.iloc[1:]  # Exclude the date row
+    selected_data.set_index("State", inplace=True)
 
-# Merge GeoDataFrame with selected data
-merged = gdf.join(selected_data.astype(float))
+    # Load GeoJSON file
+    geo = load_geojson()
 
-# Plotting
-fig, ax = plt.subplots(1, 1, figsize=(15, 15))
-merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
-plt.title(f'Poverty Rate by State in Mexico for {date}')
+    # Convert GeoJSON to GeoDataFrame
+    gdf = gpd.GeoDataFrame.from_features(geo)
 
-# Display on Streamlit
-st.pyplot(fig)
+    # Merge GeoDataFrame with selected data
+    merged = gdf.set_index("name").join(selected_data.astype(float))
+
+    # Plotting
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+    merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+    plt.title(f'Poverty Rate by State in Mexico for {date}')
+
+    # Display on Streamlit
+    st.pyplot(fig)
+
+if __name__ == '__main__':
+    main()
