@@ -72,7 +72,7 @@ with col1:
             chart = alt.Chart(selected_states_melted).mark_line().encode(
                 x=alt.X("index:T", title="Date"),
                 y=alt.Y("Percentage:Q", title="Percentage"),
-                color=alt.Color("State:N", title="State"),
+                color=alt.Color("State:N", title="State", scale=alt.Scale(scheme="category10")),
                 tooltip=["index:T", "Percentage:Q", "State:N"]
             ).properties(
                 width=550,
