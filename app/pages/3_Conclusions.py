@@ -34,7 +34,7 @@ def line_plots(data: pd.DataFrame):
             ax.plot(selected_states.index, selected_states[state], label=state)
 
         ax.set_xlabel("Date")
-        ax.set_ylabel("Percentage")  # Replace with appropriate Y-axis label
+        ax.set_ylabel("Percentage")
         ax.set_title("Percentage of People Living in Poverty")
         ax.legend()
 
