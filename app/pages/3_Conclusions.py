@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from utils import get_csv
-from gettext import NullTranslations
 
 data = get_csv()
 
@@ -27,14 +26,20 @@ def line_plots(data: pd.DataFrame):
     if selected_states.empty:
         st.warning("No state selected!")
     else:
-        for state in selected_states.columns:
-            plt.plot(selected_states.index, selected_states[state], label=state)
+        # Create a figure and axes
+        fig, ax = plt.subplots()
 
-        plt.xlabel("Date")
-        plt.ylabel("Y")  # Replace with appropriate Y-axis label
-        plt.title("Title")
-        plt.legend()
-        st.pyplot()  # Display the plot using Streamlit's pyplot function
+        for state in selected_states.columns:
+            # Plot the data on the axes
+            ax.plot(selected_states.index, selected_states[state], label=state)
+
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Percentage")  # Replace with appropriate Y-axis label
+        ax.set_title("Percentage of People Living in Poverty")
+        ax.legend()
+
+        # Display the plot using Streamlit's pyplot function
+        st.pyplot(fig)
 
 # Call the function with the 'data' DataFrame as the argument
 data = get_csv()
