@@ -8,58 +8,91 @@ from dateutil.relativedelta import relativedelta
 
 data = get_csv()
 
+#adding marging specs for the main page with css inyection
+margins_css = """
+    <style>
+        .main > div {
+            padding-left: 2rem;
+            padding-right: 2rem;
+            padding-top: 0.5rem;
+        }
+    </style>
+"""
+
+st.markdown(margins_css, unsafe_allow_html=True)
+
 st.markdown(("## " + ("Poverty Across Mexico")))
 
-def line_plots(data: pd.DataFrame):
-    """Renders line plots for selected regions (states) from data argument."""
+col1, col2 = st.columns([1,1])
 
-    # Get the state names (column names) from the DataFrame
-    states_options = data.columns.tolist()
+with col1:
+    def line_plots(data: pd.DataFrame):
+        """Renders line plots for selected regions (states) from data argument."""
 
-    # Allow the user to select one or more states using a multiselect widget
-    states = st.multiselect(
-        label="States",
-        options=states_options,
-        default=["National"],
-    )
+        # Get the state names (column names) from the DataFrame
+        states_options = data.columns.tolist()
 
-    # Filter data for the selected states
-    selected_states = data[states]
+        # Allow the user to select one or more states using a multiselect widget
+        states = st.multiselect(
+            label="States",
+            options=states_options,
+            default=["National"],
+        )
 
-    if selected_states.empty:
-        st.warning("No state selected!")
-    else:
-        # Create a figure and axes
-        fig, ax = plt.subplots()
+        # Filter data for the selected states
+        selected_states = data[states]
 
-        for state in selected_states.columns:
-            # Plot the data on the axes
-            ax.plot(selected_states.index, selected_states[state], label=state)
+        if selected_states.empty:
+            st.warning("No state selected!")
+        else:
+            # 1. Cambiar el tamaño de la figura a (15, 15)
+            fig, ax = plt.subplots(figsize=(15, 15))
 
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Percentage")
-        ax.set_title("Percentage of People Living in Poverty")
-        ax.legend()
+            for state in selected_states.columns:
+                # Plot the data on the axes
+                ax.plot(selected_states.index, selected_states[state], label=state)
 
-        # Display the plot using Streamlit's pyplot function
-        st.pyplot(fig)
+            # 2. Hacer el fondo de los ejes y de la figura transparente
+            ax.set_facecolor("none")
+            fig.patch.set_alpha(0.0)
 
-# Call the function with the 'data' DataFrame as the argument
-data = get_csv()
-line_plots(data)
+            # 3. Cambiar el color de los textos, las etiquetas de los ejes y las líneas de los ejes a blanco
+            ax.tick_params(axis='both', colors='white')
+            ax.xaxis.label.set_color('white')
+            ax.yaxis.label.set_color('white')
+            ax.title.set_color('white')
 
-# Function to load data
-@st.cache
-def load_data():
-    return pd.read_csv('data/Labor_Poverty.csv')
+            ax.set_xlabel("Date", color='white')
+            ax.set_ylabel("Percentage", color='white')
+            ax.set_title("Percentage of People Living in Poverty", color='white')
 
-# Function to load GeoJSON
-@st.cache
-def load_geojson():
-    with open("data/mexicoHigh.json", "r") as file:
-        return json.load(file)
+            # 4. Cambiar el color de los marcos de los ejes a blanco
+            for spine in ax.spines.values():
+                spine.set_edgecolor('white')
 
-def main():
+            ax.legend()
+
+            # Display the plot using Streamlit's pyplot function
+            st.pyplot(fig)
+
+    # Call the function with the 'data' DataFrame as the argument
+    data = get_csv()
+    line_plots(data)
+
+
+with col2:
+
+    # Function to load data
+    @st.cache
+    def load_data():
+        return pd.read_csv('data/Labor_Poverty.csv')
+
+    # Function to load GeoJSON
+    @st.cache
+    def load_geojson():
+        with open("data/mexicoHigh.json", "r") as file:
+            return json.load(file)
+
     # Load the dataset
     df = load_data()
 
@@ -83,13 +116,37 @@ def main():
 
     # Plotting
     fig, ax = plt.subplots(1, 1, figsize=(15, 15))
-    merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
-    plt.title(f'Poverty Rate by State in Mexico for {date}')
+
+    # 1. Hacer el fondo de los ejes y de la figura transparente
+    ax.set_facecolor("none")
+    fig.patch.set_alpha(0.0)
+    ax.axis('off')  # Desactiva los ejes para que no se muestren
+
+    # 2. Cambiar el color de borde a blanco
+    merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='white', legend=True)
+
+    # 3. Cambiar el color de los textos y las etiquetas de los ejes a blanco
+    ax.tick_params(axis='both', colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    plt.title(f'Poverty Rate by State in Mexico for {date}', color='white', fontsize=18)
+
+    # 4. Ajustar el color del texto en la barra de colores a blanco
+    cax = plt.gcf().axes[-1]
+    cax.tick_params(color='white')
+    cax.xaxis.label.set_color('white')
+    cax.yaxis.label.set_color('white')
+    for label in cax.yaxis.get_ticklabels():
+        label.set_color("white")
 
     # Display on Streamlit
     st.pyplot(fig)
 
-####################################################################################################
+
+def main():
+    st.markdown(("## " + ("Which States haven't recovered from labor poverty since Covid?")))
+
     july_index = data.index.get_loc('2020-07-01')
     july_index = data.index.get_loc('2020-07-01')
     states_list = data.columns
@@ -129,6 +186,9 @@ def main():
 
     graph = get_recovery_graph(recovered_df)
     st.pyplot(graph)
+
+    st.write("""As we can see 13 States had not recovered to pre-pandemic poverty levels which are from Mexico City till Michoacán.
+             Only 8 recovered within a year.  6 states required 1-2 years to recover.  5 took over 2 years.""")
 
 if __name__ == '__main__':
     main()
