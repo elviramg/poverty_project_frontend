@@ -29,8 +29,8 @@ col1, col2 = st.columns([1,1])
 with col1:
     ## Poverty project Front
     st.markdown("""
-        Althought poverty in Mexico has decreased over time, poverty still pose a significant challenge in many states of Mexico. \n
-        So identifying areas at risk of increasing poverty can help policymakers target interventions effectively. \n
+        Poverty posea a significant challenge in the Country, according to CONEVAL's latest data, almost 40% of the country populations lives in poverty.\n
+        So, identifying areas at risk of increasing poverty can help policymakers target interventions effectively. \n
         These intervention could lead to a better allocation of human and economic resources.
 """)
 
