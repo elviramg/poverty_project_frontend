@@ -21,11 +21,21 @@ margins_css = """
 
 st.markdown(margins_css, unsafe_allow_html=True)
 
-st.markdown(("## " + ("Poverty Across Mexico")))
+st.title("Poverty Across Mexico")
+st.markdown("### " + ("Today 37.7% of Mexico's population lives in Labor Poverty."))
+st.markdown("Here you will find interactive DataViz tools to expand on some insights. Feel free to explore and play around")
 
 col1, col2 = st.columns([1,1])
 
 with col1:
+
+    st.markdown(("## " + ("Labor Poverty by State")))
+    st.markdown(
+        (
+            "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison."
+        )
+    )
+
     def line_plots(data: pd.DataFrame):
         """Renders line plots for selected regions (states) from data argument."""
 
@@ -80,7 +90,14 @@ with col1:
     line_plots(data)
 
 
+
 with col2:
+    st.markdown(("## " + ("Poverty Rate by State in Mexico")))
+    st.markdown(
+        (
+            "Visualize the poverty rate across different states in Mexico for a specific date. Use the dropdown menu to choose a date."
+        )
+    )
 
     # Function to load data
     @st.cache
@@ -130,7 +147,7 @@ with col2:
     ax.xaxis.label.set_color('white')
     ax.yaxis.label.set_color('white')
     ax.title.set_color('white')
-    plt.title(f'Poverty Rate by State in Mexico for {date}', color='white', fontsize=18)
+    plt.title(f'Data for {date}', color='white', fontsize=18)
 
     # 4. Ajustar el color del texto en la barra de colores a blanco
     cax = plt.gcf().axes[-1]
@@ -145,7 +162,13 @@ with col2:
 
 
 def main():
-    st.markdown(("## " + ("Which States haven't recovered from labor poverty since Covid?")))
+    st.markdown(("## " + ("Recovery from Labor Poverty Post-COVID")))
+    st.markdown(
+        (
+            "Explore which states have recovered from labor poverty since the COVID pandemic hit Mexico. The data shows the number of months each state took to return to pre-pandemic poverty levels"
+            "\n a (-)1 indicates the state has not recover from the pandemic i.e The current percentage in population living in labor poverty is higher than that of April 2020."
+        )
+    )
 
     july_index = data.index.get_loc('2020-07-01')
     july_index = data.index.get_loc('2020-07-01')
