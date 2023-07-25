@@ -9,12 +9,14 @@ import altair as alt
 
 data = get_csv()
 
+st.set_page_config(layout="wide")
+
 #adding marging specs for the main page with css inyection
 margins_css = """
     <style>
         .main > div {
-            padding-left: 2rem;
-            padding-right: 2rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
             padding-top: 0.5rem;
         }
     </style>
@@ -26,136 +28,139 @@ st.title("Poverty Across Mexico")
 st.markdown("### " + ("Today 37.7% of Mexico's population lives in Labor Poverty."))
 st.markdown("Here you will find interactive DataViz tools to expand on some insights. Feel free to explore and play around")
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1,1])
 
-st.markdown(("## " + ("Labor Poverty by State")))
-st.markdown(
-    (
-        "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison.\n --------"
-    )
-)
+with col1:
 
-def line_plots(data: pd.DataFrame):
-    """Renders line plots for selected regions (states) from data argument."""
-
-    # Get the state names (column names) from the DataFrame
-    states_options = data.columns.tolist()
-
-    # Allow the user to select one or more states using a multiselect widget
-    states = st.multiselect(
-        label="States",
-        options=states_options,
-        default=["National"],
+    st.markdown(("## " + ("Labor Poverty by State")))
+    st.markdown(
+        (
+            "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison.\n --------"
+        )
     )
 
-    # Filter data for the selected states
-    selected_states = data[states]
+    def line_plots(data: pd.DataFrame):
+        """Renders line plots for selected regions (states) from data argument."""
 
-    if selected_states.empty:
-        st.warning("No state selected!")
-    else:
-        # Create a DataFrame for the selected states and reset the index
-        selected_states_df = selected_states.reset_index()
+        # Get the state names (column names) from the DataFrame
+        states_options = data.columns.tolist()
 
-        # Convert the datetime values in the index to strings
-        selected_states_df["index"] = selected_states_df["index"].dt.strftime("%Y-%m-%d")
+        # Allow the user to select one or more states using a multiselect widget
+        states = st.multiselect(
+            label="States",
+            options=states_options,
+            default=["National"],
+        )
 
-        # Melt the DataFrame to make it suitable for Altair
-        selected_states_melted = pd.melt(selected_states_df, id_vars="index", var_name="State", value_name="Percentage")
+        # Filter data for the selected states
+        selected_states = data[states]
 
-        # Create the Altair chart
-        chart = alt.Chart(selected_states_melted).mark_line().encode(
-            x=alt.X("index:T", title="Date"),
-            y=alt.Y("Percentage:Q", title="Percentage"),
-            color=alt.Color("State:N", title="State"),
-            tooltip=["index:T", "Percentage:Q", "State:N"]
-        ).properties(
-            width=700,
-            height=400
-        ).configure_axis(
-            labelColor="white",
-            titleColor="white"
-        ).configure_legend(
-            labelColor="white",
-            titleColor="white"
-        ).configure_title(
-            color="white"
-        ).interactive()
+        if selected_states.empty:
+            st.warning("No state selected!")
+        else:
+            # Create a DataFrame for the selected states and reset the index
+            selected_states_df = selected_states.reset_index()
 
-    # Display the Altair chart using Streamlit's altair_chart function
-    st.altair_chart(chart)
+            # Convert the datetime values in the index to strings
+            selected_states_df["index"] = selected_states_df["index"].dt.strftime("%Y-%m-%d")
 
-# Call the function with the 'data' DataFrame as the argument
-data = get_csv()
-line_plots(data)
+            # Melt the DataFrame to make it suitable for Altair
+            selected_states_melted = pd.melt(selected_states_df, id_vars="index", var_name="State", value_name="Percentage")
 
-st.markdown(("## " + ("Poverty Rate by State in Mexico")))
-st.markdown(
-    (
-        "Visualize the poverty rate across different states in Mexico for a specific date. \n Use the dropdown menu to choose a date.\n --------"
+            # Create the Altair chart
+            chart = alt.Chart(selected_states_melted).mark_line().encode(
+                x=alt.X("index:T", title="Date"),
+                y=alt.Y("Percentage:Q", title="Percentage"),
+                color=alt.Color("State:N", title="State"),
+                tooltip=["index:T", "Percentage:Q", "State:N"]
+            ).properties(
+                width=550,
+                height=400
+            ).configure_axis(
+                labelColor="white",
+                titleColor="white"
+            ).configure_legend(
+                labelColor="white",
+                titleColor="white"
+            ).configure_title(
+                color="white"
+            ).interactive()
+
+        # Display the Altair chart using Streamlit's altair_chart function
+        st.altair_chart(chart)
+
+    # Call the function with the 'data' DataFrame as the argument
+    data = get_csv()
+    line_plots(data)
+
+with col2:
+    st.markdown(("## " + ("Poverty Rate by State in Mexico")))
+    st.markdown(
+        (
+            "Visualize the poverty rate across different states in Mexico for a specific date. \n Use the dropdown menu to choose a date.\n --------"
+     )
     )
-)
 
-# Function to load data
-@st.cache
-def load_data():
-    return pd.read_csv('data/Labor_Poverty.csv')
+    # Function to load data
+    @st.cache
+    def load_data():
+        return pd.read_csv('data/Labor_Poverty.csv')
 
-# Function to load GeoJSON
-@st.cache
-def load_geojson():
-    with open("data/mexicoHigh.json", "r") as file:
-        return json.load(file)
+    # Function to load GeoJSON
+    @st.cache
+    def load_geojson():
+        with open("data/mexicoHigh.json", "r") as file:
+            return json.load(file)
 
-# Load the dataset
-df = load_data()
+    # Load the dataset
+    df = load_data()
 
-# Dropdown for selecting a date
-date = st.selectbox('Select a date:', df['Unnamed: 0'].unique())
+    # Dropdown for selecting a date
+    date = st.selectbox('Select a date:', df['Unnamed: 0'].unique())
 
-# Filter the dataset based on the selected date
-selected_data = df[df['Unnamed: 0'] == date].transpose().reset_index()
-selected_data.columns = ['State', 'Poverty Rate']
-selected_data = selected_data.iloc[1:]  # Exclude the date row
-selected_data.set_index("State", inplace=True)
+    # Filter the dataset based on the selected date
+    selected_data = df[df['Unnamed: 0'] == date].transpose().reset_index()
+    selected_data.columns = ['State', 'Poverty Rate']
+    selected_data = selected_data.iloc[1:]  # Exclude the date row
+    selected_data.set_index("State", inplace=True)
 
-# Load GeoJSON file
-geo = load_geojson()
+    # Load GeoJSON file
+    geo = load_geojson()
 
-# Convert GeoJSON to GeoDataFrame
-gdf = gpd.GeoDataFrame.from_features(geo)
+    # Convert GeoJSON to GeoDataFrame
+    gdf = gpd.GeoDataFrame.from_features(geo)
 
-# Merge GeoDataFrame with selected data
-merged = gdf.set_index("name").join(selected_data.astype(float))
+    # Merge GeoDataFrame with selected data
+    merged = gdf.set_index("name").join(selected_data.astype(float))
 
-# Plotting
-fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+    # Plotting
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 
-# 1. Hacer el fondo de los ejes y de la figura transparente
-ax.set_facecolor("none")
-fig.patch.set_alpha(0.0)
-ax.axis('off')  # Desactiva los ejes para que no se muestren
+    # 1. Hacer el fondo de los ejes y de la figura transparente
+    ax.set_facecolor("none")
+    fig.patch.set_alpha(0.0)
+    ax.axis('off')  # Desactiva los ejes para que no se muestren
 
-# 2. Cambiar el color de borde a blanco
-merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='white', legend=True)
+    # 2. Cambiar el color de borde a blanco
+    merged.plot(column='Poverty Rate', cmap='YlOrRd', linewidth=0.8, ax=ax, edgecolor='white', legend=True)
 
-# 3. Cambiar el color de los textos y las etiquetas de los ejes a blanco
-ax.tick_params(axis='both', colors='white')
-ax.xaxis.label.set_color('white')
-ax.yaxis.label.set_color('white')
-ax.title.set_color('white')
-plt.title(f'Data for {date}', color='white', fontsize=18)
+    # 3. Cambiar el color de los textos y las etiquetas de los ejes a blanco
+    ax.tick_params(axis='both', colors='white')
+    ax.xaxis.label.set_color('white')
+    ax.yaxis.label.set_color('white')
+    ax.title.set_color('white')
+    plt.title(f'Data for {date}', color='white', fontsize=18)
 
-# 4. Ajustar el color del texto en la barra de colores a blanco
-cax = plt.gcf().axes[-1]
-cax.tick_params(color='white')
-cax.xaxis.label.set_color('white')
-cax.yaxis.label.set_color('white')
-for label in cax.yaxis.get_ticklabels():
-    label.set_color("white")
+    # 4. Ajustar el color del texto en la barra de colores a blanco
+    cax = plt.gcf().axes[-1]
+    cax.tick_params(color='white')
+    cax.xaxis.label.set_color('white')
+    cax.yaxis.label.set_color('white')
+    for label in cax.yaxis.get_ticklabels():
+        label.set_color("white")
 
-# Display on Streamlit
-st.pyplot(fig)
+    # Display on Streamlit
+    st.pyplot(fig)
 
 
 def main():
@@ -205,6 +210,7 @@ def main():
     #recovered_df.value_counts().sort_index()
 
     graph = get_recovery_graph(recovered_df)
+    graph.set_size_inches(10, 7)
     st.pyplot(graph)
 
     st.write("""As we can see 13 States had not recovered to pre-pandemic poverty levels which are from Mexico City till Michoacán.
