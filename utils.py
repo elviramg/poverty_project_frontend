@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
+from datetime import datetime
 
 def get_csv():
     labor_pov = pd.read_csv("data/Labor_Poverty.csv", index_col=0, parse_dates=True)
@@ -31,7 +32,9 @@ def get_csv():
     return labor_pov
 
 def get_model_csv():
-    model_pred = pd.read_csv("output/model_prediction.csv", index_col=0)
+    model_pred = pd.read_csv("output/model_prediction.csv", index_col=0).transpose()
+    new_index = list(model_pred.index)
+    model_pred.index = pd.to_datetime(new_index, format="%m-%Y")
     return model_pred
 
 def yearly_rankings(data, start_year=2005, end_year=2023):

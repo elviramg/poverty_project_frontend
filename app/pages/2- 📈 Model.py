@@ -3,14 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import geopandas as gpd
-from utils import get_csv, get_recovery_graph
+from utils import get_csv, get_recovery_graph, get_model_csv
 from dateutil.relativedelta import relativedelta
 import altair as alt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 data = get_csv()
+data_model = get_model_csv()
+merged_data = pd.concat([data, data_model])
 
-st.set_page_config(layout="wide")
+#st.set_page_config(layout="wide")
 
 #adding marging specs for the main page with css inyection
 margins_css = """
@@ -86,6 +88,7 @@ with col1:
             ).configure_title(
                 color="white"
             ).interactive()
+
 
         # Display the Altair chart using Streamlit's altair_chart function
         st.altair_chart(chart)
