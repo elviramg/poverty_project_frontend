@@ -30,6 +30,10 @@ def get_csv():
 
     return labor_pov
 
+def get_model_csv():
+    model_pred = pd.read_csv("output/model_prediction.csv", index_col=0)
+    return model_pred
+
 def yearly_rankings(data, start_year=2005, end_year=2023):
     """"THIS FUNCTION RETURNS A DATAFRAME WITH THE YEARLY RANKINGS OF POVERTY BY STATE (% OF PEOPLE IN LABOR POVERTY)
     OVER A SELECTED RANGE OF YEARS (FIRST PLACE HAS HIGHEST RATE, LAST PLACE HAS LOWEST.)"""
