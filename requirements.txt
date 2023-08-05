@@ -6,4 +6,3 @@ geopandas
 mplcursors
 pydeck
 tensorflow
-utils
