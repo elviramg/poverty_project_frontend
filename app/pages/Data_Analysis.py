@@ -179,6 +179,7 @@ with col1:
     line_plots(data)
 
 with col2:
+
     st.markdown(("## " + ("Poverty Rate by State in Mexico")))
     st.markdown("Visualize the poverty rate across different states in Mexico for a specific date. \n Use the dropdown menu to choose a date.")
 
