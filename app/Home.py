@@ -1,13 +1,4 @@
 import streamlit as st
-import sys
-import os
-
-# Assuming the 'utils.py' file is located in the 'utils_folder' directory relative to the 'Data_Analysis.py'
-utils = os.path.join(os.path.dirname(__file__), 'utils.py')
-sys.path.append(utils)
-
-# Setting the wide config for the page
-st.set_page_config(layout="wide")
 
 #adding marging specs for the main page with css inyection
 margins_css = """
