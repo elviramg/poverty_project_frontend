@@ -122,11 +122,7 @@ col1, col2 = st.columns([1,1])
 with col1:
 
     st.markdown(("## " + ("Labor Poverty by State")))
-    st.markdown(
-        (
-            "Explore the percentage of people living in poverty for different states across Mexico over time. \n -------- Use the multiselect widget to select one or more states for comparison.\n --------"
-        )
-    )
+    st.markdown( "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison.\n")
 
     def line_plots(data: pd.DataFrame):
         """Renders line plots for selected regions (states) from data argument."""
