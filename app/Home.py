@@ -3,7 +3,7 @@ import sys
 import os
 
 # Assuming the 'utils.py' file is located in the 'utils_folder' directory relative to the 'Data_Analysis.py'
-utils = os.path.join(os.path.dirname(__file__), '..', 'utils.py')
+utils = os.path.join(os.path.dirname(__file__), 'utils.py')
 sys.path.append(utils)
 
 # Setting the wide config for the page
