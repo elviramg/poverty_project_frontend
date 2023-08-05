@@ -1,0 +1,8 @@
+streamlit
+pandas
+requests
+matplotlib
+geopandas
+mplcursor
+pydeck
+tensorflow
