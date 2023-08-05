@@ -124,7 +124,7 @@ with col1:
     st.markdown(("## " + ("Labor Poverty by State")))
     st.markdown(
         (
-            "Explore the percentage of people living in poverty for different states across Mexico over time. \n Use the multiselect widget to select one or more states for comparison.\n --------"
+            "Explore the percentage of people living in poverty for different states across Mexico over time. \n -------- Use the multiselect widget to select one or more states for comparison.\n --------"
         )
     )
 
