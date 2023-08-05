@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import geopandas as gpd
-from utils import get_csv, get_recovery_graph
+from app.utils import get_csv, get_recovery_graph
 from dateutil.relativedelta import relativedelta
 import altair as alt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
